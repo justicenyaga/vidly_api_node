@@ -1,1 +1,1 @@
-# vidly_api_node
+# Vidly API
