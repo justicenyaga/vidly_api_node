@@ -2,6 +2,7 @@ const { Rental, validate } = require("../models/rental");
 const { Customer } = require("../models/customer");
 const { Movie } = require("../models/movie");
 const auth = require("../middlewares/auth");
+const validateObjectId = require("../middlewares/validateObjectId");
 const _ = require("lodash");
 const mongoose = require("mongoose");
 const express = require("express");
@@ -50,7 +51,7 @@ router.post("/", auth, async (req, res) => {
   session.endSession();
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", validateObjectId, async (req, res) => {
   const rental = await Rental.findById(req.params.id);
   if (!rental)
     return res.status(404).send("The rental with the given Id was not found");
