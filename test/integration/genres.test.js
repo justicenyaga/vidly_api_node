@@ -36,4 +36,25 @@ describe("/api/genres", () => {
       expect(res.body.some((g) => g.name === "genre2")).toBeTruthy();
     });
   });
+
+  describe("GET /:id", () => {
+    it("should return a genre if a valid id is passed", async () => {
+      const genre = await Genre.create({ name: "genre1" });
+
+      const res = await request(server).get("/api/genres/" + genre._id);
+
+      expect(res.body).toHaveProperty("name", "genre1");
+    });
+
+    it("should return 404 if an invalid id is passed", async () => {
+      const res = await request(server).get("/api/genres/1");
+      expect(res.status).toBe(404);
+    });
+
+    it("should return 404 if no genre with the given id exists", async () => {
+      const id = new mongoose.Types.ObjectId();
+      const res = await request(server).get("/api/genres/" + id);
+      expect(res.status).toBe(404);
+    });
+  });
 });
