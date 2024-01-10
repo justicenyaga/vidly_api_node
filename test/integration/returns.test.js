@@ -52,6 +52,7 @@ describe("/api/returns", () => {
   afterEach(async () => {
     await server.close();
     await Rental.deleteMany({});
+    await Movie.deleteMany({});
   });
 
   const exec = () =>
