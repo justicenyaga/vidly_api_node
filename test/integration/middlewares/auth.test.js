@@ -6,15 +6,15 @@ const {
   expect,
   it,
 } = require("@jest/globals");
-const { User } = require("../../models/user");
-const { Genre } = require("../../models/genre");
+const { User } = require("../../../models/user");
+const { Genre } = require("../../../models/genre");
 
 describe("auth middleware", () => {
   let server;
   let token;
 
   beforeEach(() => {
-    server = require("../../index");
+    server = require("../../../index");
     token = new User().generateAuthToken();
   });
 

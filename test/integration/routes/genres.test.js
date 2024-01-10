@@ -7,14 +7,14 @@ const {
   expect,
   it,
 } = require("@jest/globals");
-const { Genre } = require("../../models/genre");
-const { User } = require("../../models/user");
+const { Genre } = require("../../../models/genre");
+const { User } = require("../../../models/user");
 
 let server;
 
 describe("/api/genres", () => {
   beforeEach(() => {
-    server = require("../../index");
+    server = require("../../../index");
   });
 
   afterEach(async () => {

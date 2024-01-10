@@ -8,9 +8,9 @@ const {
   expect,
   it,
 } = require("@jest/globals");
-const { Rental } = require("../../models/rental");
-const { User } = require("../../models/user");
-const { Movie } = require("../../models/movie");
+const { Rental } = require("../../../models/rental");
+const { User } = require("../../../models/user");
+const { Movie } = require("../../../models/movie");
 
 describe("/api/returns", () => {
   let server;
@@ -21,7 +21,7 @@ describe("/api/returns", () => {
   let movie;
 
   beforeEach(async () => {
-    server = require("../../index");
+    server = require("../../../index");
 
     token = new User().generateAuthToken();
     customerId = new mongoose.Types.ObjectId();
