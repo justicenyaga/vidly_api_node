@@ -173,4 +173,81 @@ describe("/api/movies", () => {
       );
     });
   });
+
+  describe("PUT /:id", () => {
+    let token;
+    let title;
+    let numberInStock;
+    let dailyRentalRate;
+    let genreId;
+    let movieId;
+
+    beforeEach(async () => {
+      token = new User().generateAuthToken();
+      title = "movie5";
+      dailyRentalRate = 4;
+      numberInStock = 20;
+      genreId = new mongoose.Types.ObjectId();
+      movieId = new mongoose.Types.ObjectId();
+
+      const genre = await Genre.create({ _id: genreId, name: "genre1" });
+
+      await Movie.create({
+        _id: movieId,
+        title: "movie1",
+        dailyRentalRate: 2,
+        numberInStock: 10,
+        genre,
+      });
+    });
+
+    const exec = () =>
+      request(server)
+        .put("/api/movies/" + movieId)
+        .set("x-auth-token", token)
+        .send({ title, dailyRentalRate, numberInStock, genreId });
+
+    it("should return 401 if the client is not logged in", async () => {
+      token = "";
+      const res = await exec();
+      expect(res.status).toBe(401);
+    });
+
+    it("should return 400 if no genre with the given genreId exists", async () => {
+      genreId = new mongoose.Types.ObjectId();
+      const res = await exec();
+      expect(res.status).toBe(400);
+    });
+
+    it("should return 404 if no movie with the given id exists", async () => {
+      movieId = new mongoose.Types.ObjectId();
+      const res = await exec();
+      expect(res.status).toBe(404);
+    });
+
+    it("should update the movie if the request is valid", async () => {
+      await exec();
+      const movie = await Movie.findById(movieId);
+
+      const expected_object = {
+        title,
+        numberInStock,
+        dailyRentalRate,
+      };
+      expect(movie).toMatchObject(expected_object);
+    });
+
+    it("should return the movie if the request is valid", async () => {
+      const res = await exec();
+      expect(Object.keys(res.body)).toEqual(
+        expect.arrayContaining([
+          "_id",
+          "title",
+          "numberInStock",
+          "dailyRentalRate",
+          "genre",
+        ])
+      );
+    });
+  });
 });
