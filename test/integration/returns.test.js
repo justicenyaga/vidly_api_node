@@ -50,4 +50,13 @@ describe("/api/returns", () => {
 
     expect(res.status).toBe(401);
   });
+
+  it("should return 400 if no customerId is provided", async () => {
+    const res = await request(server)
+      .post("/api/returns")
+      .set("x-auth-token", token)
+      .send({ movieId });
+
+    expect(res.status).toBe(400);
+  });
 });
