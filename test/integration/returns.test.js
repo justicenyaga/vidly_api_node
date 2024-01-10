@@ -43,29 +43,27 @@ describe("/api/returns", () => {
     await Rental.deleteMany({});
   });
 
-  it("should return 401 if the client is not logged in", async () => {
-    const res = await request(server)
+  const exec = () =>
+    request(server)
       .post("/api/returns")
+      .set("x-auth-token", token)
       .send({ customerId, movieId });
 
+  it("should return 401 if the client is not logged in", async () => {
+    token = "";
+    const res = await exec();
     expect(res.status).toBe(401);
   });
 
   it("should return 400 if no customerId is provided", async () => {
-    const res = await request(server)
-      .post("/api/returns")
-      .set("x-auth-token", token)
-      .send({ movieId });
-
+    customerId = "";
+    const res = await exec();
     expect(res.status).toBe(400);
   });
 
   it("should return 400 if no movieId is provided", async () => {
-    const res = await request(server)
-      .post("/api/returns")
-      .set("x-auth-token", token)
-      .send({ customerId });
-
+    movieId = "";
+    const res = await exec();
     expect(res.status).toBe(400);
   });
 });
