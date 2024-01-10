@@ -1,7 +1,8 @@
-const { Rental, validate } = require("../models/rental");
+const { Rental, validate: validateRental } = require("../models/rental");
 const { Customer } = require("../models/customer");
 const { Movie } = require("../models/movie");
 const auth = require("../middlewares/auth");
+const validate = require("../middlewares/validate");
 const validateObjectId = require("../middlewares/validateObjectId");
 const _ = require("lodash");
 const mongoose = require("mongoose");
@@ -13,10 +14,7 @@ router.get("/", async (req, res) => {
   res.send(rentals);
 });
 
-router.post("/", auth, async (req, res) => {
-  const { error } = validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
-
+router.post("/", [auth, validate(validateRental)], async (req, res) => {
   const customer = await Customer.findById(req.body.customerId);
   if (!customer) return res.status(400).send("Invalid customer");
 
