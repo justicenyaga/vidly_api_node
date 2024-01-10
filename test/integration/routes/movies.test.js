@@ -1,4 +1,5 @@
 const request = require("supertest");
+const mongoose = require("mongoose");
 const {
   afterEach,
   beforeEach,
@@ -46,6 +47,33 @@ describe("/api/movies", () => {
       expect(
         res.body.some((m) => m.title === "movie2" && m.dailyRentalRate === 4)
       ).toBeTruthy();
+    });
+  });
+
+  describe("GET /:id", () => {
+    it("should return the movie if valid id is passed", async () => {
+      const movie_object = {
+        title: "movie1",
+        numberInStock: 2,
+        dailyRentalRate: 4,
+        genre: { name: "genre1" },
+      };
+      const movie = await Movie.create(movie_object);
+
+      const res = await request(server).get("/api/movies/" + movie._id);
+
+      expect(res.body).toMatchObject(movie_object);
+    });
+
+    it("should return 404 if an invalid id is passed", async () => {
+      const res = await request(server).get("/api/movies/1");
+      expect(res.status).toBe(404);
+    });
+
+    it("should return 404 if no movie exists for the given id", async () => {
+      const id = new mongoose.Types.ObjectId();
+      const res = await request(server).get("/api/movies/" + id);
+      expect(res.status).toBe(404);
     });
   });
 });
