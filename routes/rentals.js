@@ -40,7 +40,7 @@ router.post("/", [auth, validate(validateRental)], async (req, res) => {
     await movie.updateOne({ $inc: { numberInStock: -1 } }, { session });
 
     await session.commitTransaction();
-    res.send(rental);
+    res.send(rental[0]);
   } catch (error) {
     await session.abortTransaction();
     res.status(500).send("Something went wrong.");
