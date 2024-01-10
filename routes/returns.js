@@ -1,4 +1,4 @@
-const { Rental } = require("../models/rental");
+const { Rental, validate: validateReturn } = require("../models/rental");
 const { Movie } = require("../models/movie");
 const auth = require("../middlewares/auth");
 const moment = require("moment");
@@ -6,9 +6,8 @@ const express = require("express");
 const router = express.Router();
 
 router.post("/", auth, async (req, res) => {
-  if (!req.body.customerId)
-    return res.status(400).send("customerId not provided.");
-  if (!req.body.movieId) return res.status(400).send("movieId not provided");
+  const { error } = validateReturn(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
 
   const rental = await Rental.findOne({
     "customer._id": req.body.customerId,
