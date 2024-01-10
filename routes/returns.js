@@ -29,7 +29,7 @@ router.post("/", auth, async (req, res) => {
     $inc: { numberInStock: 1 },
   });
 
-  res.status(200).send();
+  res.send(rental);
 });
 
 module.exports = router;
