@@ -1,4 +1,5 @@
 const request = require("supertest");
+const mongoose = require("mongoose");
 const {
   afterEach,
   beforeEach,
@@ -40,6 +41,28 @@ describe("/api/customers", () => {
           (c) => c.name === "customer2" && c.phone === "67890" && !c.isGold
         )
       ).toBeTruthy();
+    });
+  });
+
+  describe("GET /:id", () => {
+    it("should return the customer if valid id is passed", async () => {
+      const customer_object = { name: "customer1", phone: "12345" };
+      const customer = await Customer.create(customer_object);
+
+      const res = await request(server).get("/api/customers/" + customer._id);
+
+      expect(res.body).toMatchObject(customer_object);
+    });
+
+    it("should return 404 if an invalid id is passed", async () => {
+      const res = await request(server).get("/api/customers/1");
+      expect(res.status).toBe(404);
+    });
+
+    it("should return 404 if no customer exists for the given id", async () => {
+      const id = new mongoose.Types.ObjectId();
+      const res = await request(server).get("/api/customers/" + id);
+      expect(res.status).toBe(404);
     });
   });
 });
