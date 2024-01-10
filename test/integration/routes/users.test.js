@@ -1,6 +1,7 @@
 const request = require("supertest");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
 const config = require("config");
 const {
   afterEach,
@@ -20,16 +21,13 @@ describe("/api/users", () => {
 
   afterEach(async () => {
     await server.close();
+    await User.deleteMany({});
   });
 
   describe("POST /", () => {
     let name, email, password;
     beforeEach(() => {
       (name = "user1"), (email = "user@email.com"), (password = "12345");
-    });
-
-    afterEach(async () => {
-      await User.deleteMany({});
     });
 
     const exec = () =>
@@ -66,6 +64,24 @@ describe("/api/users", () => {
       const token = res.headers["x-auth-token"];
       const decoded = jwt.verify(token, config.get("jwtPrivateKey"));
       expect(decoded).toHaveProperty("_id");
+    });
+  });
+
+  describe("GET /me", () => {
+    it("should return the user if a valid JWT is passed on the request header", async () => {
+      const user = await User.create({
+        name: "user1",
+        email: "user@email.com",
+        password: "12345",
+      });
+      const token = user.generateAuthToken();
+      const res = await request(server)
+        .get("/api/users/me")
+        .set("x-auth-token", token);
+
+      expect(res.body).toHaveProperty("_id");
+      expect(res.body).toHaveProperty("name", "user1");
+      expect(res.body).toHaveProperty("email", "user@email.com");
     });
   });
 });
