@@ -1,0 +1,10 @@
+Return 401 if the client is not logged in
+Return 400 if customerId is not provided
+Return 400 if movieId is not provided
+Return 404 if no rental is found for the given customer/movieId
+Return 400 if the rental has already been processed
+Return 200 if valid request
+Set the return date
+Calculate the rental fee
+Increase the movie stock
+Return the rental
