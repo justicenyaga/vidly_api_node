@@ -1,4 +1,4 @@
-const { Movie, validate: validateMovie } = require("../models/movie");
+const { Movie, validateMovie } = require("../models/movie");
 const { Genre } = require("../models/genre");
 const auth = require("../middlewares/auth");
 const admin = require("../middlewares/admin");

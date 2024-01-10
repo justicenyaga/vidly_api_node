@@ -1,4 +1,4 @@
-const { User, validate: validateUser } = require("../models/user");
+const { User, validateUser } = require("../models/user");
 const auth = require("../middlewares/auth");
 const validate = require("../middlewares/validate");
 const _ = require("lodash");

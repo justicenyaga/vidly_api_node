@@ -1,4 +1,4 @@
-const { Genre, validate: validateGenre } = require("../models/genre");
+const { Genre, validateGenre } = require("../models/genre");
 const auth = require("../middlewares/auth");
 const admin = require("../middlewares/admin");
 const validate = require("../middlewares/validate");

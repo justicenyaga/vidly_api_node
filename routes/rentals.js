@@ -1,4 +1,4 @@
-const { Rental, validate: validateRental } = require("../models/rental");
+const { Rental, validateRental } = require("../models/rental");
 const { Customer } = require("../models/customer");
 const { Movie } = require("../models/movie");
 const auth = require("../middlewares/auth");

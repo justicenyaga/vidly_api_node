@@ -1,4 +1,4 @@
-const { Rental, validate: validateReturn } = require("../models/rental");
+const { Rental, validateRental } = require("../models/rental");
 const { Movie } = require("../models/movie");
 const auth = require("../middlewares/auth");
 const validate = require("../middlewares/validate");
@@ -6,7 +6,7 @@ const moment = require("moment");
 const express = require("express");
 const router = express.Router();
 
-router.post("/", [auth, validate(validateReturn)], async (req, res) => {
+router.post("/", [auth, validate(validateRental)], async (req, res) => {
   const rental = await Rental.findOne({
     "customer._id": req.body.customerId,
     "movie._id": req.body.movieId,
