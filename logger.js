@@ -1,7 +1,10 @@
+const config = require("config");
 const { createLogger, transports, format } = require("winston");
 const { combine, colorize, timestamp, prettyPrint, printf, json, simple } =
   format;
 require("winston-mongodb");
+
+const db = config.get("db");
 
 module.exports = createLogger({
   format: combine(prettyPrint(), simple()),
@@ -27,7 +30,7 @@ module.exports = createLogger({
     new transports.MongoDB({
       level: "info",
       format: json(),
-      db: "mongodb://localhost/vidly",
+      db,
       options: {
         useUnifiedTopology: true,
       },
