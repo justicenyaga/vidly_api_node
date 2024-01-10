@@ -1,4 +1,5 @@
 const request = require("supertest");
+const mongoose = require("mongoose");
 const {
   afterEach,
   beforeEach,
@@ -47,6 +48,30 @@ describe("/api/rentals", () => {
           (r) => r.customer.name === "customer2" && r.movie.title === "movie2"
         )
       ).toBeTruthy();
+    });
+  });
+
+  describe("GET /:id", () => {
+    it("should return a rental if given a valid id", async () => {
+      const id = new mongoose.Types.ObjectId();
+      await Rental.create({
+        _id: id,
+        customer: { name: "customer1", phone: "12345" },
+        movie: { title: "movie1", dailyRentalRate: 2 },
+      });
+
+      const res = await request(server).get("/api/rentals/" + id);
+      expect(res.body.customer).toHaveProperty("name", "customer1");
+      expect(res.body.movie).toHaveProperty("title", "movie1");
+      expect(Object.keys(res.body)).toEqual(
+        expect.arrayContaining(["_id", "customer", "movie", "dateOut"])
+      );
+    });
+
+    it("should return 404 if no rental with the given id exists", async () => {
+      const id = new mongoose.Types.ObjectId();
+      const res = await request(server).get("/api/rentals/" + id);
+      expect(res.status).toBe(404);
     });
   });
 });
