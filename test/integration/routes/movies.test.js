@@ -250,4 +250,52 @@ describe("/api/movies", () => {
       );
     });
   });
+
+  describe("DELETE /:id", () => {
+    let token;
+    let movieId;
+
+    beforeEach(async () => {
+      token = new User({ isAdmin: true }).generateAuthToken();
+      movieId = new mongoose.Types.ObjectId();
+
+      await Movie.create({
+        _id: movieId,
+        title: "movie1",
+        numberInStock: 20,
+        dailyRentalRate: 4,
+        genre: { name: "genre1" },
+      });
+    });
+
+    const exec = () =>
+      request(server)
+        .delete("/api/movies/" + movieId)
+        .set("x-auth-token", token);
+
+    it("should return 404 if no movie with the given id exists", async () => {
+      movieId = new mongoose.Types.ObjectId();
+      const res = await exec();
+      expect(res.status).toBe(404);
+    });
+
+    it("should delete the movie if the input is valid", async () => {
+      await exec();
+      const movie = await Movie.findById(movieId);
+      expect(movie).toBeNull();
+    });
+
+    it("should return the deleted movie if the input is valid", async () => {
+      const res = await exec();
+      expect(Object.keys(res.body)).toEqual(
+        expect.arrayContaining([
+          "_id",
+          "title",
+          "dailyRentalRate",
+          "numberInStock",
+          "genre",
+        ])
+      );
+    });
+  });
 });
