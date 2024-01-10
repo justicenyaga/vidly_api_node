@@ -8,6 +8,9 @@ const {
   it,
 } = require("@jest/globals");
 const { Rental } = require("../../../models/rental");
+const { User } = require("../../../models/user");
+const { Customer } = require("../../../models/customer");
+const { Movie } = require("../../../models/movie");
 
 describe("/api/rentals", () => {
   let server;
@@ -72,6 +75,84 @@ describe("/api/rentals", () => {
       const id = new mongoose.Types.ObjectId();
       const res = await request(server).get("/api/rentals/" + id);
       expect(res.status).toBe(404);
+    });
+  });
+
+  describe("POST /", () => {
+    let customerId;
+    let movieId;
+    let token;
+    let numberInStock;
+
+    beforeEach(async () => {
+      customerId = new mongoose.Types.ObjectId();
+      movieId = new mongoose.Types.ObjectId();
+      token = new User().generateAuthToken();
+      numberInStock = 3;
+
+      await Customer.create({
+        _id: customerId,
+        name: "customer1",
+        phone: "12345",
+      });
+
+      await Movie.create({
+        _id: movieId,
+        title: "movie1",
+        numberInStock,
+        dailyRentalRate: 2,
+        genre: { name: "genre1" },
+      });
+    });
+
+    afterEach(async () => {
+      await Customer.deleteMany({});
+      await Movie.deleteMany({});
+      await Rental.deleteMany({});
+    });
+
+    const exec = () =>
+      request(server)
+        .post("/api/rentals")
+        .set("x-auth-token", token)
+        .send({ customerId, movieId });
+
+    it("should return 400 if no customer with the given customerId exists", async () => {
+      customerId = new mongoose.Types.ObjectId();
+      const res = await exec();
+      expect(res.status).toBe(400);
+    });
+
+    it("should return 400 if no movie with the given movieId exists", async () => {
+      movieId = new mongoose.Types.ObjectId();
+      const res = await exec();
+      expect(res.status).toBe(400);
+    });
+
+    it("should return 400 if the given movie is not in stock", async () => {
+      const movie = await Movie.create({
+        title: "movie1",
+        numberInStock: 0,
+        dailyRentalRate: 2,
+        genre: { name: "genre1" },
+      });
+      movieId = movie._id;
+
+      const res = await exec();
+      expect(res.status).toBe(400);
+    });
+
+    it("should return the rental if the inputs are valid", async () => {
+      const res = await exec();
+      expect(Object.keys(res.body)).toEqual(
+        expect.arrayContaining(["_id", "customer", "movie", "dateOut"])
+      );
+    });
+
+    it("should decrement the movie stock if the inputs are valid", async () => {
+      await exec();
+      const movieInDb = await Movie.findById(movieId);
+      expect(movieInDb.numberInStock).toBe(numberInStock - 1);
     });
   });
 });
