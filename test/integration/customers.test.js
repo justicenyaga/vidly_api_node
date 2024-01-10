@@ -8,6 +8,7 @@ const {
   it,
 } = require("@jest/globals");
 const { Customer } = require("../../models/customer");
+const { User } = require("../../models/user");
 
 describe("/api/customers", () => {
   let server;
@@ -63,6 +64,69 @@ describe("/api/customers", () => {
       const id = new mongoose.Types.ObjectId();
       const res = await request(server).get("/api/customers/" + id);
       expect(res.status).toBe(404);
+    });
+  });
+
+  describe("POST /", () => {
+    let token;
+    let name;
+    let phone;
+
+    beforeEach(() => {
+      token = new User().generateAuthToken();
+      name = "customer1";
+      phone = "12345";
+    });
+
+    const exec = () =>
+      request(server)
+        .post("/api/customers")
+        .set("x-auth-token", token)
+        .send({ name, phone });
+
+    it("should return 401 if the client is not logged in", async () => {
+      token = "";
+      const res = await exec();
+      expect(res.status).toBe(401);
+    });
+
+    it("should return 400 if customer name is less than 5 characters", async () => {
+      name = "a";
+      const res = await exec();
+      expect(res.status).toBe(400);
+    });
+
+    it("should return 400 if customer name is more than 50 characters", async () => {
+      name = new Array(52).join("a");
+      const res = await exec();
+      expect(res.status).toBe(400);
+    });
+
+    it("should return 400 if phone is less than 5 characters", async () => {
+      phone = "1";
+      const res = await exec();
+      expect(res.status).toBe(400);
+    });
+
+    it("should return 400 if phone is more than 50 characters", async () => {
+      phone = new Array(52).join("1");
+      const res = await exec();
+      expect(res.status).toBe(400);
+    });
+
+    it("should save the customer if the request is valid", async () => {
+      await exec();
+      const customer = await Customer.findOne({ name, phone });
+      expect(customer).toHaveProperty("_id");
+      expect(customer).toHaveProperty("name", "customer1");
+      expect(customer).toHaveProperty("phone", "12345");
+    });
+
+    it("should return the customer if the request is valid", async () => {
+      const res = await exec();
+      expect(Object.keys(res.body)).toEqual(
+        expect.arrayContaining(["_id", "name", "phone", "isGold"])
+      );
     });
   });
 });
