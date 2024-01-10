@@ -129,4 +129,91 @@ describe("/api/customers", () => {
       );
     });
   });
+
+  describe("PUT /:id", () => {
+    let token;
+    let name;
+    let phone;
+    let customerId;
+
+    beforeEach(async () => {
+      token = new User().generateAuthToken();
+      customerId = new mongoose.Types.ObjectId();
+      name = "customer5";
+      phone = "67890";
+
+      await Customer.create({
+        _id: customerId,
+        name: "customer1",
+        phone: "12345",
+      });
+    });
+
+    const exec = () =>
+      request(server)
+        .put("/api/customers/" + customerId)
+        .set("x-auth-token", token)
+        .send({ name, phone });
+
+    it("should return 401 if the client is not logged in", async () => {
+      token = "";
+      const res = await exec();
+      expect(res.status).toBe(401);
+    });
+
+    it("should return 400 if customer name is less than 5 characters", async () => {
+      name = "a";
+      const res = await exec();
+      expect(res.status).toBe(400);
+    });
+
+    it("should return 400 if customer name is more than 50 characters", async () => {
+      name = new Array(52).join("a");
+      const res = await exec();
+      expect(res.status).toBe(400);
+    });
+
+    it("should return 400 if phone is less than 5 characters", async () => {
+      phone = "1";
+      const res = await exec();
+      expect(res.status).toBe(400);
+    });
+
+    it("should return 400 if phone is more than 50 characters", async () => {
+      phone = new Array(52).join("1");
+      const res = await exec();
+      expect(res.status).toBe(400);
+    });
+
+    it("should return 404 if an invalid id is passed", async () => {
+      customerId = 1;
+      const res = await exec();
+      expect(res.status).toBe(404);
+    });
+
+    it("should return 404 if no customer with the given id exists", async () => {
+      customerId = new mongoose.Types.ObjectId();
+      const res = await exec();
+      expect(res.status).toBe(404);
+    });
+
+    it("should update the customer if the request is valid", async () => {
+      await exec();
+      const customer = await Customer.findById(customerId);
+
+      const expected_object = {
+        name: "customer5",
+        phone: "67890",
+        isGold: false,
+      };
+      expect(customer).toMatchObject(expected_object);
+    });
+
+    it("should return the customer if the request is valid", async () => {
+      const res = await exec();
+      expect(Object.keys(res.body)).toEqual(
+        expect.arrayContaining(["_id", "name", "phone", "isGold"])
+      );
+    });
+  });
 });
