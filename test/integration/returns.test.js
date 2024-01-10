@@ -10,6 +10,7 @@ const {
 } = require("@jest/globals");
 const { Rental } = require("../../models/rental");
 const { User } = require("../../models/user");
+const { Movie } = require("../../models/movie");
 
 describe("/api/returns", () => {
   let server;
@@ -17,6 +18,7 @@ describe("/api/returns", () => {
   let movieId;
   let rental;
   let token;
+  let movie;
 
   beforeEach(async () => {
     server = require("../../index");
@@ -24,6 +26,14 @@ describe("/api/returns", () => {
     token = new User().generateAuthToken();
     customerId = new mongoose.Types.ObjectId();
     movieId = new mongoose.Types.ObjectId();
+
+    movie = await Movie.create({
+      _id: movieId,
+      title: "12345",
+      numberInStock: 10,
+      dailyRentalRate: 2,
+      genre: { name: "genre1" },
+    });
 
     rental = await Rental.create({
       customer: {
@@ -105,5 +115,12 @@ describe("/api/returns", () => {
 
     const rentalInDb = await Rental.findById(rental._id);
     expect(rentalInDb.rentalFee).toBe(14); // rentalFee is dailyRentalRate (2) x days rented (7)
+  });
+
+  it("should increate the movie stock if the request is valid", async () => {
+    await exec();
+
+    const movieInDb = await Movie.findById(movieId);
+    expect(movieInDb.numberInStock).toBe(movie.numberInStock + 1);
   });
 });
