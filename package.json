@@ -7,7 +7,11 @@
     "verbose": true
   },
   "scripts": {
-    "test": "jest --watchAll --detectOpenHandles --coverage"
+    "test": "jest --watchAll --detectOpenHandles --coverage",
+    "start": "node index.js"
+  },
+  "engines": {
+    "node": "22.6.0"
   },
   "keywords": [],
   "author": "",
